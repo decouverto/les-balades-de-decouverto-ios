@@ -1,7 +1,7 @@
-import React from "react";
-import { Linking, View, ScrollView, Button } from "react-native";
+import React from 'react';
+import { Linking, View, ScrollView, Button } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-
+import HTMLView from 'react-native-htmlview';
 import {
   Icon,
   ThemeProvider,
@@ -105,6 +105,7 @@ export default class ShopsScreen extends React.Component {
                     {(data.distance / 1000).toFixed(1)}km
                   </ListItem.Subtitle>
                   <Text>{data.address}</Text>
+                  <HTMLView value={data.description} />
                   <Button
                     title="S'y rendre"
                     onPress={() => this.openMap(data)}

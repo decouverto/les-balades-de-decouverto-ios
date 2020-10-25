@@ -1,6 +1,6 @@
-import React from "react";
-import { Linking, Alert, View, ScrollView, Button } from "react-native";
-import AsyncStorage from "@react-native-community/async-storage";
+import React from 'react';
+import { Linking, Alert, View, ScrollView, Button } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import {
   Icon,
   ThemeProvider,
@@ -8,9 +8,9 @@ import {
   ListItem,
   Text,
   SearchBar,
-} from "react-native-elements";
+} from 'react-native-elements';
 
-const rootURL = "http://decouverto.fr/walks/";
+const rootURL = 'http://decouverto.fr/walks/';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -21,8 +21,7 @@ export default class App extends React.Component {
       downloadedWalks: [],
       wlkToDisplay: [],
       downloading: false,
-      search: "",
-      searching: false,
+      search: ''
     };
     this.state = state;
   }
