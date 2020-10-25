@@ -1,18 +1,20 @@
 import React from 'react';
-import { Linking, Alert, View, Share, ScrollView, Button } from 'react-native';
+import { Linking, Alert, View, ScrollView, Button } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import { Icon, Divider, ThemeProvider, Header, ListItem, Text } from 'react-native-elements';
+import { Icon, ThemeProvider, Header, ListItem, Text, SearchBar } from 'react-native-elements';
+
 
 const rootURL = 'http://decouverto.fr/walks/';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    let state = { errLoading: false, walks: [], downloadedWalks: [], wlkToDisplay: [], downloading: false, selectedSector: 'all', selectedTheme: 'all', selectedType: 'all', search: '', searching: false }
+    let state = { errLoading: false, walks: [], downloadedWalks: [], wlkToDisplay: [], downloading: false, search: '', searching: false }
     this.state = state;
   }
 
   componentDidMount() {
+        this._mounted = true;
         //AsyncStorage.multiSet([['walks', JSON.stringify([])], ['downloadedWalks', JSON.stringify([])]]);
         AsyncStorage.multiGet(['walks', 'downloadedWalks'], (err, values) => {
             if (values !== null && !err) {
@@ -66,12 +68,8 @@ export default class App extends React.Component {
         });
     }
 
-  shareWalk(data) {
-        Share.share(
-            {
-                message: `${data.title}\n${data.description} Elle fait ${(data.distance / 1000).toFixed(1)}km.\nhttps://decouverto.fr/rando/${data.id}`
-            }
-        );
+    componentWillUnmount() {
+        this._mounted = false;
     }
 
   calculateWlkToDisplay(id) {
@@ -80,21 +78,12 @@ export default class App extends React.Component {
             return element.id === id;
         });
         if (found) {
-            return this.setState({ wlkToDisplay: [found], searching: true, search: found.title });
+            return this.setState({ wlkToDisplay: [found], search: found.title });
         }
     }
     var arr = [];
     this.state.walks.forEach((data) => {
         let err = false;
-        if (this.state.selectedSector != 'all' && this.state.selectedSector != data.zone) {
-            err = true;
-        }
-        if (this.state.selectedTheme != 'all' && this.state.selectedTheme != data.theme) {
-            err = true;
-        }
-        if (this.state.selectedType != 'all' && this.state.selectedType != data.fromBook) {
-            err = true;
-        }
         if (this.state.search != '') {
             if (data.zone.search(new RegExp(this.state.search, 'i')) == -1 && data.theme.search(new RegExp(this.state.search, 'i')) == -1 && data.description.search(new RegExp(this.state.search, 'i')) == -1 && data.title.search(new RegExp(this.state.search, 'i')) == -1) {
                 err = true;
@@ -145,14 +134,24 @@ export default class App extends React.Component {
             <Header
                 leftComponent={<Icon name='menu' type='material' color='#fff' onPress={() => this.props.navigation.openDrawer()} />}
                 centerComponent={{ text: 'Découverto', style: { color: '#fff' } }}
-                rightComponent={<Icon name='search' type='search' color='#fff' onPress={() => this.setState({ searching: !this.state.searching, selectedTheme: 'all', selectedSector: 'all', selectedType: 'all', search: '' }, () => /*this.calculateWlkToDisplay()*/ false)} />}
+                rightComponent={<Icon name='search' type='search' color='#fff' onPress={() => false} />}
                 containerStyle={{
                     backgroundColor: '#dc3133',
                     justifyContent: 'space-around',
                 }}
             />
-        <Divider style={{ backgroundColor: '#dc3133' }} />
+            
+        
+        
+        
+      <View>
+      <SearchBar
+        placeholder="Rechercher une balade"
+        onChangeText={(search) => this.setState({ search: search }, () => this.calculateWlkToDisplay())}
+        value={this.state.search}
+      />
         <ScrollView>
+        
         {
             this.state.wlkToDisplay.map((data, i) => (
             <ListItem key={i} bottomDivider>
@@ -172,6 +171,7 @@ export default class App extends React.Component {
             ))
         }
         </ScrollView>
+        </View>
     </ThemeProvider>
     );
   }
