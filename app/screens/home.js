@@ -29,6 +29,18 @@ export default class App extends React.Component {
 
   componentDidMount() {
     this._mounted = true;
+
+    var openDeepLink = (url) => {
+      if (url) {
+        const route = url.replace(/.*?:\/\//g, "");
+        const id = route.match(/\/([^\/]+)\/?$/)[1];
+        const routeName = route.split("/")[1];
+        if (routeName === "rando") {
+          this.calculateWlkToDisplay(id);
+        }
+      }
+    };
+
     //AsyncStorage.multiSet([['walks', JSON.stringify([])], ['downloadedWalks', JSON.stringify([])]]);
     AsyncStorage.multiGet(["walks", "downloadedWalks"], (err, values) => {
       if (values !== null && !err) {
@@ -39,8 +51,8 @@ export default class App extends React.Component {
           }
         }
         this.setState(obj, () => {
-          Linking.addEventListener("url", function (event) {
-            this.openDeepLink(event.url);
+          Linking.addEventListener("url", (event) => {
+            openDeepLink(event.url);
           });
           this.calculateWlkToDisplay();
         });
@@ -65,9 +77,9 @@ export default class App extends React.Component {
               },
               () => {
                 if (this.state.wlkToDisplay.length == 0) {
-                    Linking.addEventListener("url", function (event) {
-                      this.openDeepLink(event.url);
-                    });
+                  Linking.addEventListener("url", (event) => {
+                    openDeepLink(event.url);
+                  });
                 }
                 this.calculateWlkToDisplay();
               }
@@ -121,42 +133,6 @@ export default class App extends React.Component {
       return 0;
     });
     this.setState({ wlkToDisplay: arr });
-  }
-
-  onSectorChange(sector) {
-    this.setState(
-      {
-        selectedSector: sector,
-      },
-      this.calculateWlkToDisplay
-    );
-  }
-
-  onThemeChange(theme) {
-    this.setState(
-      {
-        selectedTheme: theme,
-      },
-      this.calculateWlkToDisplay
-    );
-  }
-
-  onTypeChange(type) {
-    this.setState(
-      {
-        selectedType: type,
-      },
-      this.calculateWlkToDisplay
-    );
-  }
-
-  onSearch(search) {
-    this.setState(
-      {
-        search: search,
-      },
-      this.calculateWlkToDisplay
-    );
   }
 
   render() {
