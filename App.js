@@ -1,4 +1,5 @@
 import HomeScreen from "./app/screens/home.js";
+import ShopsScreen from "./app/screens/shops.js";
 
 import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
@@ -11,6 +12,7 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator initialRouteName="Home">
         <Drawer.Screen name="Accueil" component={HomeScreen} />
+        <Drawer.Screen name="Liste des points de vente" component={ShopsScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
