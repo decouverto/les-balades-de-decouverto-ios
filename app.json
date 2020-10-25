@@ -1,12 +1,4 @@
 {
-  "name": "les-balades-de-decouverto-ios",
-  "displayName": "les-balades-de-decouverto-ios",
-  "expo": {
-    "name": "les-balades-de-decouverto-ios",
-    "slug": "les-balades-de-decouverto-ios",
-    "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ]
-  }
+  "name": "decouverto",
+  "displayName": "Découverto"
 }
