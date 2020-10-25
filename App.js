@@ -1,9 +1,8 @@
+import HomeScreen from "./app/screens/home.js";
 
-import HomeScreen from './app/screens/home.js';
-
-import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import * as React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
 const Drawer = createDrawerNavigator();
 
