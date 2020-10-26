@@ -1,5 +1,10 @@
 import React from 'react';
-import { Linking, Alert, View, ScrollView, Button } from 'react-native';
+import { Linking, Alert, View, ScrollView, Button, LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'RCTBridge'
+]);
+
 import AsyncStorage from '@react-native-community/async-storage';
 import {
   Icon,
@@ -10,7 +15,15 @@ import {
   SearchBar,
 } from 'react-native-elements';
 
+import fs from 'react-native-fs';
+import DialogProgress from 'react-native-dialog-progress';
+import { unzip } from 'react-native-zip-archive';
+
 const rootURL = 'http://decouverto.fr/walks/';
+const rootDirectory = fs.ExternalDirectoryPath + '/';
+
+import tileList from 'osm-tile-list-json';
+import { each } from 'async';
 
 export default class App extends React.Component {
   constructor(props) {
