@@ -268,7 +268,7 @@ export default class App extends React.Component {
   }
 
   openWalk(data) {
-    /*fs.readFile(rootDirectory + data.id + '/index.json').then((response) => {
+    fs.readFile(rootDirectory + data.id + '/index.json').then((response) => {
         this.props.navigation.navigate('AboutWalk', { ...data, ...JSON.parse(response) });
     }).catch(() => {
         Alert.alert(
@@ -279,8 +279,7 @@ export default class App extends React.Component {
             ],
             { cancelable: false }
         );
-    });*/
-    return false;
+    });
   }
 
   isDownloaded(id) {

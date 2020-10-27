@@ -1,5 +1,6 @@
 import HomeScreen from "./app/screens/home.js";
 import ShopsScreen from "./app/screens/shops.js";
+import AboutWalkScreen from "./app/screens/about-walk.js";
 import { Linking, Share, Alert } from "react-native";
 import { Icon } from "react-native-elements";
 
@@ -71,6 +72,7 @@ export default function App() {
         drawerContent={(props) => <CustomDrawerContent {...props} />}>
         <Drawer.Screen name="Home" component={HomeScreen} />
         <Drawer.Screen name="Shops" component={ShopsScreen} />
+        <Drawer.Screen name="AboutWalk" component={AboutWalkScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
