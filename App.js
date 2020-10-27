@@ -1,5 +1,6 @@
 import HomeScreen from "./app/screens/home.js";
 import ShopsScreen from "./app/screens/shops.js";
+import SettingsScreen from "./app/screens/settings.js";
 import AboutWalkScreen from "./app/screens/about-walk.js";
 import { Linking, Share, Alert } from "react-native";
 import { Icon } from "react-native-elements";
@@ -18,9 +19,11 @@ import Geolocation from "@react-native-community/geolocation";
 const Drawer = createDrawerNavigator();
 
 const routes = [{
-  way: 'Home', text: 'Accueil', icon: 'home'
+  way: 'Home', text: 'Accueil', icon: 'home', iconFont: 'font-awesome-5'
 }, {
-  way: 'Shops', text: 'Points de vente', icon: 'shopping-cart'
+  way: 'Shops', text: 'Points de vente', icon: 'shopping-cart', iconFont: 'font-awesome-5'
+}, {
+  way: 'Settings', text: 'Paramètres', icon: 'settings', iconFont: 'material'
 }];
 
 function CustomDrawerContent(props) {
@@ -31,7 +34,7 @@ function CustomDrawerContent(props) {
         label={data.text}
         key={i}
         onPress={() => props.navigation.navigate(data.way)}
-        icon={({ focused, color, size }) => <Icon color={color} size={size} type="font-awesome-5" name={data.icon} />} />
+        icon={({ focused, color, size }) => <Icon color={color} size={size} type={data.iconFont} name={data.icon} />} />
       ))}
       <DrawerItem
         label="Site internet"
@@ -72,6 +75,7 @@ export default function App() {
         drawerContent={(props) => <CustomDrawerContent {...props} />}>
         <Drawer.Screen name="Home" component={HomeScreen} />
         <Drawer.Screen name="Shops" component={ShopsScreen} />
+        <Drawer.Screen name="Settings" component={SettingsScreen} />
         <Drawer.Screen name="AboutWalk" component={AboutWalkScreen} />
       </Drawer.Navigator>
     </NavigationContainer>

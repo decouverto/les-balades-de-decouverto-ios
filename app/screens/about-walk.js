@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, Alert, ScrollView, View } from 'react-native';
+import { Linking, ScrollView } from 'react-native';
 import { Card, Button, Icon, ThemeProvider, Header, Text } from 'react-native-elements';
 
 

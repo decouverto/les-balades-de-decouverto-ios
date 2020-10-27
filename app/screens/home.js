@@ -390,10 +390,10 @@ export default class App extends React.Component {
           centerComponent={{ text: "Découverto", style: { color: "#fff" } }}
           rightComponent={
             <Icon
-              name="search"
-              type="search"
+              name="settings"
+              type="material"
               color="#fff"
-              onPress={() => false}
+              onPress={() => this.props.navigation.navigate('Settings')}
             />
           }
           containerStyle={{
