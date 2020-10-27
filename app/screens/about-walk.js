@@ -6,10 +6,13 @@ import { Card, Button, Icon, ThemeProvider, Header, Text } from 'react-native-el
 export default class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = props.route.params;
+        this.state = this.props.route.params;
     }
 
-    componentDidMount() {
+    componentDidUpdate(prevProps) {
+        if (this.props.route.params.id != prevProps.route.params.id) {
+            this.setState(this.props.route.params);
+        } 
     }
 
     componentWillUnmount() {
