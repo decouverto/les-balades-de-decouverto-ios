@@ -1,6 +1,7 @@
 import HomeScreen from "./app/screens/home.js";
 import ShopsScreen from "./app/screens/shops.js";
 import { Linking, Share, Alert } from "react-native";
+import { Icon } from "react-native-elements";
 
 import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
@@ -15,18 +16,32 @@ import Geolocation from "@react-native-community/geolocation";
 
 const Drawer = createDrawerNavigator();
 
+const routes = [{
+  way: 'Home', text: 'Accueil', icon: 'home'
+}, {
+  way: 'Shops', text: 'Points de vente', icon: 'shopping-cart'
+}];
+
 function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
-      <DrawerItemList {...props} />
+      {routes.map((data, i) => (
+        <DrawerItem
+        label={data.text}
+        key={i}
+        onPress={() => props.navigation.navigate(data.way)}
+        icon={({ focused, color, size }) => <Icon color={color} size={size} type="font-awesome-5" name={data.icon} />} />
+      ))}
       <DrawerItem
         label="Site internet"
         onPress={() => {
           Linking.openURL("https://www.decouverto.fr");
         }}
+        icon={({ focused, color, size }) => <Icon color={color} size={size} type="font-awesome-5" name="globe-europe" />}
       />
       <DrawerItem
-        label="Partager ma position GPS"
+        label="Partager ma position"
+        icon={({ focused, color, size }) => <Icon color={color} size={size} type="material" name="pin-drop" />}
         onPress={() => {
           Geolocation.getCurrentPosition((location) => {
               var date = new Date();
@@ -47,17 +62,15 @@ function CustomDrawerContent(props) {
   );
 }
 
+
 export default function App() {
   return (
     <NavigationContainer>
       <Drawer.Navigator
-        initialRouteName="Accueil"
+        initialRouteName="Home"
         drawerContent={(props) => <CustomDrawerContent {...props} />}>
-        <Drawer.Screen name="Accueil" component={HomeScreen} />
-        <Drawer.Screen
-          name="Liste des points de vente"
-          component={ShopsScreen}
-        />
+        <Drawer.Screen name="Home" component={HomeScreen} />
+        <Drawer.Screen name="Shops" component={ShopsScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
