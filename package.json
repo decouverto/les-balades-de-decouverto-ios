@@ -21,7 +21,6 @@
     "osm-tile-list-json": "0.0.2",
     "react": "16.13.1",
     "react-native": "0.63.3",
-    "react-native-dialog-progress": "git+https://github.com/ydangleapps/react-native-dialog-progress.git",
     "react-native-elements": "^3.0.0-alpha.1",
     "react-native-fs": "^2.16.6",
     "react-native-gesture-handler": "^1.8.0",
