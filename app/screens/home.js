@@ -421,9 +421,9 @@ export default class App extends React.Component {
                   <ListItem.Title style={{ color: "#2c3e50" }}>
                     {data.title} {(data.downloaded) ? (
                       <Icon
-                        name='walking'
-                        type='font-awesome-5'
-                        color='#16a085'
+                        name="walking"
+                        type="font-awesome-5"
+                        color="#16a085"
                       />
                     ) : (
                         null
