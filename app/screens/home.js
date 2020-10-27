@@ -20,7 +20,7 @@ import DialogProgress from 'react-native-dialog-progress';
 import { unzip } from 'react-native-zip-archive';
 
 const rootURL = 'http://decouverto.fr/walks/';
-const rootDirectory = fs.ExternalDirectoryPath + '/';
+const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
 
 import tileList from 'osm-tile-list-json';
 import { each } from 'async';
@@ -147,6 +147,191 @@ export default class App extends React.Component {
     this.setState({ wlkToDisplay: arr });
   }
 
+  createDirectory(id, cb) {
+    fs.exists(rootDirectory + id).then((exists) => {
+      if (exists) return cb();
+      fs.mkdir(rootDirectory + id).then(cb).catch(cb);
+    }).catch(cb)
+  }
+
+  downloadWalk(data) {
+    if (this.state.downloading) return true;
+    let localError = (message) => {
+      this.setState({
+        downloading: false
+      }, (message) => {
+        this.error(message);
+      });
+    }
+    this.setState({
+      downloading: true
+    }, () => {
+      this.createDirectory(data.id, (err) => {
+        fs.downloadFile({
+          fromUrl: rootURL + data.id + '.zip',
+          toFile: rootDirectory + data.id + '/tmp.zip',
+          begin: () => {
+            DialogProgress.hide();
+            DialogProgress.show({
+              title: 'Téléchargement',
+              message: 'Veuillez patientez...',
+              isCancelable: false
+            });
+          },
+          progress: (result) => {
+            DialogProgress.hide();
+            DialogProgress.show({
+              title: 'Téléchargement',
+              message: 'Veuillez patientez... ' + Math.round(result.bytesWritten / result.contentLength * 100) + '%',
+              isCancelable: false
+            });
+          }
+        }).promise.then((result) => {
+          DialogProgress.hide();
+          let size = result.bytesWritten;
+          unzip(rootDirectory + data.id + '/tmp.zip', rootDirectory + data.id)
+            .then(() => {
+              fs.unlink(rootDirectory + data.id + '/tmp.zip')
+                .then(() => {
+                  let list = this.state.downloadedWalks;
+                  list.push(data.id);
+                  AsyncStorage.setItem('downloadedWalks', JSON.stringify(list));
+                  DialogProgress.hide();
+                  DialogProgress.show({
+                    title: 'Téléchargement des cartes',
+                    message: 'Veuillez patientez... ',
+                    isCancelable: false
+                  });
+                  this.downloadMap(data.distance, data.id, (progress) => {
+                    DialogProgress.hide();
+                    DialogProgress.show({
+                      title: 'Téléchargement des cartes',
+                      message: 'Veuillez patientez... ' + Math.round(progress * 100) + '%',
+                      isCancelable: false
+                    });
+                  }, (err, mapSize) => {
+                    DialogProgress.hide();
+                    if (err) {
+                      if (Math.floor(size * 1e-6) == 0) {
+                        size = Math.floor(size * 1e-3) + ' ko';
+                      } else {
+                        size = Math.floor(size * 1e-6) + ' Mo';
+                      }
+                      Alert.alert(
+                        'Succès',
+                        'Téléchargement réussit:\n' + size + ' téléchargés',
+                        [
+                          { text: 'Ok' },
+                        ],
+                        { cancelable: false }
+                      );
+                    } else {
+                      size += mapSize;
+                      if (Math.floor(size * 1e-6) == 0) {
+                        size = Math.floor(size * 1e-3) + ' ko';
+                      } else {
+                        size = Math.floor(size * 1e-6) + ' Mo';
+                      }
+                      Alert.alert(
+                        'Succès',
+                        'Téléchargement réussit: \n' + size + ' téléchargés avec les cartes',
+                        [
+                          { text: 'Ok' },
+                        ],
+                        { cancelable: false }
+                      );
+                    };
+                    this.setState({
+                      downloading: false
+                    }, () => {
+                      this.openWalk(data);
+                    });
+                  })
+                })
+                .catch(() => { localError('Erreur lors de la suppression du fichier temporaire') })
+            }).catch(() => { localError('Échec de la décompression') })
+        }).catch(() => { localError('Échec du téléchargement') })
+      });
+    });
+  }
+
+  openWalk(data) {
+      /*fs.readFile(rootDirectory + data.id + '/index.json').then((response) => {
+          this.props.navigation.navigate('AboutWalk', { ...data, ...JSON.parse(response) });
+      }).catch(() => {
+          Alert.alert(
+              'Erreur',
+              'Impossible de lire le parcours',
+              [
+                  { text: 'Ok' },
+              ],
+              { cancelable: false }
+          );
+      })*/
+      return false;
+  }
+
+  downloadMap (km, id, progress, cb) {
+      fs.readFile(rootDirectory + id + '/index.json').then((response) => {
+          data = JSON.parse(response);
+
+          let maxZoomLevel = 16;
+          if (km < 5000) {
+              maxZoomLevel = 18;
+          }
+
+          tiles = tileList(data.borders, 12, maxZoomLevel, false, 0.01);
+          n = tiles.length;
+          c = 0;
+          size = 0;
+
+          each(tiles, (tile, callback) => {
+              this.createDirectory(id + '/' + tile.z, (err) => {
+                  if (err) {
+                      console.warn(err)
+                      callback(err)
+                  } else {
+                      this.createDirectory(id + '/' + tile.z + '/' + tile.x, (err) => {
+                          if (err) {
+                              console.warn(err)
+                              callback(err)
+                          } else {
+                              fs.downloadFile({
+                                  fromUrl: 'https://a.tile.openstreetmap.org/' + tile.z + '/' + tile.x + '/' + tile.y + '.png', // to do add random for server URL
+                                  toFile: rootDirectory + '/' + id + '/' + tile.z + '/' + tile.x + '/' + tile.y + '.png'
+                              }).promise.then((result) => {
+                                  size += result.bytesWritten;
+                                  c+=1;
+                                  progress(c/n)
+                                  callback();
+                              }).catch(callback)
+                          }
+                      });
+                  }
+              });
+          }, function() {
+              cb(null, size)
+          });
+      
+          
+      }).catch(function(err) {
+          console.warn(err)
+          cb(true)
+      })
+  }
+
+  error(msg) {
+      DialogProgress.hide();
+      Alert.alert(
+          'Erreur',
+          msg,
+          [
+              { text: 'Ok' },
+          ],
+          { cancelable: false }
+      );
+  }
+
   render() {
     return (
       <ThemeProvider>
@@ -197,12 +382,12 @@ export default class App extends React.Component {
                   {data.fromBook == "true" ? (
                     <Text style={{ color: "#7f8c8d" }}>Tracé uniquement</Text>
                   ) : (
-                    <Text style={{ color: "#7f8c8d" }}>Balade commentée</Text>
-                  )}
+                      <Text style={{ color: "#7f8c8d" }}>Balade commentée</Text>
+                    )}
                   <Text italic={data.fromBook}>{data.description}</Text>
                   <Button
                     title="Télécharger"
-                    onPress={() => /*this.downloadWalk(data)*/ false}
+                    onPress={() => this.downloadWalk(data)}
                   />
                 </ListItem.Content>
               </ListItem>
