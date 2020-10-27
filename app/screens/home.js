@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, Alert, View, ScrollView, Button, LogBox } from 'react-native';
+import { Linking, Alert, ScrollView, Button, LogBox, Modal, View, ActivityIndicator } from 'react-native';
 
 LogBox.ignoreLogs([
   'RCTBridge'
@@ -16,7 +16,6 @@ import {
 } from 'react-native-elements';
 
 import fs from 'react-native-fs';
-import DialogProgress from 'react-native-dialog-progress';
 import { unzip } from 'react-native-zip-archive';
 
 const rootURL = 'http://decouverto.fr/walks/';
@@ -34,7 +33,11 @@ export default class App extends React.Component {
       downloadedWalks: [],
       wlkToDisplay: [],
       downloading: false,
-      search: ''
+      search: '',
+      downloadingProgress: {
+        message: '',
+        title: ''
+      }
     };
     this.state = state;
   }
@@ -157,11 +160,19 @@ export default class App extends React.Component {
   downloadWalk(data) {
     if (this.state.downloading) return true;
     let localError = (message) => {
-      this.setState({
-        downloading: false
-      }, (message) => {
-        this.error(message);
-      });
+      Alert.alert(
+        'Erreur',
+        message,
+        [
+            { 
+              text: 'Ok',
+              onPress: () => { 
+                this.hideDownloadingMessage(); 
+              }
+            }
+        ],
+        { cancelable: false }
+      );
     }
     this.setState({
       downloading: true
@@ -171,23 +182,18 @@ export default class App extends React.Component {
           fromUrl: rootURL + data.id + '.zip',
           toFile: rootDirectory + data.id + '/tmp.zip',
           begin: () => {
-            DialogProgress.hide();
-            DialogProgress.show({
+            this.showDowloadingMessage({
               title: 'Téléchargement',
-              message: 'Veuillez patientez...',
-              isCancelable: false
+              message: 'Veuillez patientez...'
             });
           },
           progress: (result) => {
-            DialogProgress.hide();
-            DialogProgress.show({
+            this.showDowloadingMessage({
               title: 'Téléchargement',
-              message: 'Veuillez patientez... ' + Math.round(result.bytesWritten / result.contentLength * 100) + '%',
-              isCancelable: false
+              message: 'Veuillez patientez... ' + Math.round(result.bytesWritten / result.contentLength * 100) + '%'
             });
           }
         }).promise.then((result) => {
-          DialogProgress.hide();
           let size = result.bytesWritten;
           unzip(rootDirectory + data.id + '/tmp.zip', rootDirectory + data.id)
             .then(() => {
@@ -196,57 +202,61 @@ export default class App extends React.Component {
                   let list = this.state.downloadedWalks;
                   list.push(data.id);
                   AsyncStorage.setItem('downloadedWalks', JSON.stringify(list));
-                  DialogProgress.hide();
-                  DialogProgress.show({
+                  this.showDowloadingMessage({
                     title: 'Téléchargement des cartes',
-                    message: 'Veuillez patientez... ',
-                    isCancelable: false
+                    message: 'Veuillez patientez... '
                   });
                   this.downloadMap(data.distance, data.id, (progress) => {
-                    DialogProgress.hide();
-                    DialogProgress.show({
+                    this.showDowloadingMessage({
                       title: 'Téléchargement des cartes',
-                      message: 'Veuillez patientez... ' + Math.round(progress * 100) + '%',
-                      isCancelable: false
+                      message: 'Veuillez patientez... ' + Math.round(progress * 100) + '%'
                     });
                   }, (err, mapSize) => {
-                    DialogProgress.hide();
-                    if (err) {
-                      if (Math.floor(size * 1e-6) == 0) {
-                        size = Math.floor(size * 1e-3) + ' ko';
+                    this.showDowloadingMessage({title: 'Téléchargement terminé', message: ''}, () => {
+                      if (err) {
+                        if (Math.floor(size * 1e-6) == 0) {
+                          size = Math.floor(size * 1e-3) + ' ko';
+                        } else {
+                          size = Math.floor(size * 1e-6) + ' Mo';
+                        }
+                        Alert.alert(
+                          'Succès',
+                          'Téléchargement réussit:\n' + size + ' téléchargés',
+                          [
+                            { text: 'Ok', 
+                              onPress: () => { 
+                                  this.hideDownloadingMessage(() => {
+                                    this.openWalk(data);
+                                  }); 
+                              } 
+                            }
+                          ],
+                          { cancelable: false }
+                        );
                       } else {
-                        size = Math.floor(size * 1e-6) + ' Mo';
-                      }
-                      Alert.alert(
-                        'Succès',
-                        'Téléchargement réussit:\n' + size + ' téléchargés',
-                        [
-                          { text: 'Ok' },
-                        ],
-                        { cancelable: false }
-                      );
-                    } else {
-                      size += mapSize;
-                      if (Math.floor(size * 1e-6) == 0) {
-                        size = Math.floor(size * 1e-3) + ' ko';
-                      } else {
-                        size = Math.floor(size * 1e-6) + ' Mo';
-                      }
-                      Alert.alert(
-                        'Succès',
-                        'Téléchargement réussit: \n' + size + ' téléchargés avec les cartes',
-                        [
-                          { text: 'Ok' },
-                        ],
-                        { cancelable: false }
-                      );
-                    };
-                    this.setState({
-                      downloading: false
-                    }, () => {
-                      this.openWalk(data);
+                        size += mapSize;
+                        if (Math.floor(size * 1e-6) == 0) {
+                          size = Math.floor(size * 1e-3) + ' ko';
+                        } else {
+                          size = Math.floor(size * 1e-6) + ' Mo';
+                        }
+                        Alert.alert(
+                          'Succès',
+                          'Téléchargement réussit: \n' + size + ' téléchargés avec les cartes',
+                          [
+                            { text: 'Ok', 
+                              onPress: () => { 
+                                  this.hideDownloadingMessage(() => {
+                                    this.openWalk(data);
+                                  }); 
+                              } 
+                            }
+                          ],
+                          { cancelable: false }
+                        );
+                      };
                     });
-                  })
+                  });
                 })
                 .catch(() => { localError('Erreur lors de la suppression du fichier temporaire') })
             }).catch(() => { localError('Échec de la décompression') })
@@ -267,9 +277,11 @@ export default class App extends React.Component {
               ],
               { cancelable: false }
           );
-      })*/
+      });*/
       return false;
   }
+
+
 
   downloadMap (km, id, progress, cb) {
       fs.readFile(rootDirectory + id + '/index.json').then((response) => {
@@ -320,8 +332,31 @@ export default class App extends React.Component {
       })
   }
 
+  showDowloadingMessage(val, cb) {
+    this.setState({
+      downloadingProgress: val 
+    }, () => {
+      if (typeof cb === 'function') {
+        cb()
+      }
+    });
+  }
+
+  hideDownloadingMessage(cb) {
+    this.setState({
+      downloading: false,
+      downloadingProgress: {
+        title: '',
+        message: ''
+      } 
+    }, () => {
+      if (typeof cb === 'function') {
+        cb()
+      }
+    });
+  }
+
   error(msg) {
-      DialogProgress.hide();
       Alert.alert(
           'Erreur',
           msg,
@@ -360,6 +395,7 @@ export default class App extends React.Component {
         />
 
         <View>
+          <CustomProgressBar visible={this.state.downloading} message={this.state.downloadingProgress.message} title={this.state.downloadingProgress.title} />
           <SearchBar
             placeholder="Rechercher une balade"
             onChangeText={(search) =>
@@ -398,3 +434,16 @@ export default class App extends React.Component {
     );
   }
 }
+
+
+const CustomProgressBar = ({ visible, title, message }) => (
+  <Modal visible={visible}>
+          <View style={{ flex:1,backgroundColor:"#00000020", justifyContent:"center",alignItems:"center"}}>
+            <View style={{backgroundColor:"white",padding:10,borderRadius:5, width:"80%", alignItems:"center"}}>
+              <Text style={{fontSize: 20}}>{title}</Text>
+              <Text>{message}</Text>
+              <ActivityIndicator size="large" color="#dc3133"/>
+            </View>
+          </View>
+        </Modal>
+);
