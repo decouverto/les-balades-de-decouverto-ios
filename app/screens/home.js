@@ -137,7 +137,7 @@ export default class App extends React.Component {
         }
       }
       if (!err) {
-        //data.downloaded = this.isDownloaded(data.id);
+        data.downloaded = this.isDownloaded(data.id);
         arr.push(data);
       }
     });
@@ -164,12 +164,12 @@ export default class App extends React.Component {
         'Erreur',
         message,
         [
-            { 
-              text: 'Ok',
-              onPress: () => { 
-                this.hideDownloadingMessage(); 
-              }
+          {
+            text: 'Ok',
+            onPress: () => {
+              this.hideDownloadingMessage();
             }
+          }
         ],
         { cancelable: false }
       );
@@ -212,7 +212,7 @@ export default class App extends React.Component {
                       message: 'Veuillez patientez... ' + Math.round(progress * 100) + '%'
                     });
                   }, (err, mapSize) => {
-                    this.showDowloadingMessage({title: 'Téléchargement terminé', message: ''}, () => {
+                    this.showDowloadingMessage({ title: 'Téléchargement terminé', message: '' }, () => {
                       if (err) {
                         if (Math.floor(size * 1e-6) == 0) {
                           size = Math.floor(size * 1e-3) + ' ko';
@@ -223,12 +223,13 @@ export default class App extends React.Component {
                           'Succès',
                           'Téléchargement réussit:\n' + size + ' téléchargés',
                           [
-                            { text: 'Ok', 
-                              onPress: () => { 
-                                  this.hideDownloadingMessage(() => {
-                                    this.openWalk(data);
-                                  }); 
-                              } 
+                            {
+                              text: 'Ok',
+                              onPress: () => {
+                                this.hideDownloadingMessage(() => {
+                                  this.openWalk(data);
+                                });
+                              }
                             }
                           ],
                           { cancelable: false }
@@ -244,12 +245,13 @@ export default class App extends React.Component {
                           'Succès',
                           'Téléchargement réussit: \n' + size + ' téléchargés avec les cartes',
                           [
-                            { text: 'Ok', 
-                              onPress: () => { 
-                                  this.hideDownloadingMessage(() => {
-                                    this.openWalk(data);
-                                  }); 
-                              } 
+                            {
+                              text: 'Ok',
+                              onPress: () => {
+                                this.hideDownloadingMessage(() => {
+                                  this.openWalk(data);
+                                });
+                              }
                             }
                           ],
                           { cancelable: false }
@@ -266,75 +268,82 @@ export default class App extends React.Component {
   }
 
   openWalk(data) {
-      /*fs.readFile(rootDirectory + data.id + '/index.json').then((response) => {
-          this.props.navigation.navigate('AboutWalk', { ...data, ...JSON.parse(response) });
-      }).catch(() => {
-          Alert.alert(
-              'Erreur',
-              'Impossible de lire le parcours',
-              [
-                  { text: 'Ok' },
-              ],
-              { cancelable: false }
-          );
-      });*/
-      return false;
+    /*fs.readFile(rootDirectory + data.id + '/index.json').then((response) => {
+        this.props.navigation.navigate('AboutWalk', { ...data, ...JSON.parse(response) });
+    }).catch(() => {
+        Alert.alert(
+            'Erreur',
+            'Impossible de lire le parcours',
+            [
+                { text: 'Ok' },
+            ],
+            { cancelable: false }
+        );
+    });*/
+    return false;
   }
 
+  isDownloaded(id) {
+    for (let k in this.state.downloadedWalks) {
+      if (this.state.downloadedWalks[k] == id) {
+        return true;
+      }
+    }
+    return false;
+  }
 
+  downloadMap(km, id, progress, cb) {
+    fs.readFile(rootDirectory + id + '/index.json').then((response) => {
+      data = JSON.parse(response);
 
-  downloadMap (km, id, progress, cb) {
-      fs.readFile(rootDirectory + id + '/index.json').then((response) => {
-          data = JSON.parse(response);
+      let maxZoomLevel = 16;
+      if (km < 5000) {
+        maxZoomLevel = 18;
+      }
 
-          let maxZoomLevel = 16;
-          if (km < 5000) {
-              maxZoomLevel = 18;
+      tiles = tileList(data.borders, 12, maxZoomLevel, false, 0.01);
+      n = tiles.length;
+      c = 0;
+      size = 0;
+
+      each(tiles, (tile, callback) => {
+        this.createDirectory(id + '/' + tile.z, (err) => {
+          if (err) {
+            console.warn(err)
+            callback(err)
+          } else {
+            this.createDirectory(id + '/' + tile.z + '/' + tile.x, (err) => {
+              if (err) {
+                console.warn(err)
+                callback(err)
+              } else {
+                fs.downloadFile({
+                  fromUrl: 'https://a.tile.openstreetmap.org/' + tile.z + '/' + tile.x + '/' + tile.y + '.png', // to do add random for server URL
+                  toFile: rootDirectory + '/' + id + '/' + tile.z + '/' + tile.x + '/' + tile.y + '.png'
+                }).promise.then((result) => {
+                  size += result.bytesWritten;
+                  c += 1;
+                  progress(c / n)
+                  callback();
+                }).catch(callback)
+              }
+            });
           }
+        });
+      }, function () {
+        cb(null, size)
+      });
 
-          tiles = tileList(data.borders, 12, maxZoomLevel, false, 0.01);
-          n = tiles.length;
-          c = 0;
-          size = 0;
 
-          each(tiles, (tile, callback) => {
-              this.createDirectory(id + '/' + tile.z, (err) => {
-                  if (err) {
-                      console.warn(err)
-                      callback(err)
-                  } else {
-                      this.createDirectory(id + '/' + tile.z + '/' + tile.x, (err) => {
-                          if (err) {
-                              console.warn(err)
-                              callback(err)
-                          } else {
-                              fs.downloadFile({
-                                  fromUrl: 'https://a.tile.openstreetmap.org/' + tile.z + '/' + tile.x + '/' + tile.y + '.png', // to do add random for server URL
-                                  toFile: rootDirectory + '/' + id + '/' + tile.z + '/' + tile.x + '/' + tile.y + '.png'
-                              }).promise.then((result) => {
-                                  size += result.bytesWritten;
-                                  c+=1;
-                                  progress(c/n)
-                                  callback();
-                              }).catch(callback)
-                          }
-                      });
-                  }
-              });
-          }, function() {
-              cb(null, size)
-          });
-      
-          
-      }).catch(function(err) {
-          console.warn(err)
-          cb(true)
-      })
+    }).catch(function (err) {
+      console.warn(err)
+      cb(true)
+    })
   }
 
   showDowloadingMessage(val, cb) {
     this.setState({
-      downloadingProgress: val 
+      downloadingProgress: val
     }, () => {
       if (typeof cb === 'function') {
         cb()
@@ -348,7 +357,7 @@ export default class App extends React.Component {
       downloadingProgress: {
         title: '',
         message: ''
-      } 
+      }
     }, () => {
       if (typeof cb === 'function') {
         cb()
@@ -357,14 +366,14 @@ export default class App extends React.Component {
   }
 
   error(msg) {
-      Alert.alert(
-          'Erreur',
-          msg,
-          [
-              { text: 'Ok' },
-          ],
-          { cancelable: false }
-      );
+    Alert.alert(
+      'Erreur',
+      msg,
+      [
+        { text: 'Ok' },
+      ],
+      { cancelable: false }
+    );
   }
 
   render() {
@@ -410,7 +419,15 @@ export default class App extends React.Component {
               <ListItem key={i} bottomDivider>
                 <ListItem.Content>
                   <ListItem.Title style={{ color: "#2c3e50" }}>
-                    {data.title}
+                    {data.title} {(data.downloaded) ? (
+                      <Icon
+                        name='walking'
+                        type='font-awesome-5'
+                        color='#16a085'
+                      />
+                    ) : (
+                        null
+                      )}
                   </ListItem.Title>
                   <ListItem.Subtitle style={{ color: "#34495e" }}>
                     {(data.distance / 1000).toFixed(1)}km
@@ -421,10 +438,18 @@ export default class App extends React.Component {
                       <Text style={{ color: "#7f8c8d" }}>Balade commentée</Text>
                     )}
                   <Text italic={data.fromBook}>{data.description}</Text>
-                  <Button
-                    title="Télécharger"
-                    onPress={() => this.downloadWalk(data)}
-                  />
+                  {(data.downloaded) ? (
+                    <Button
+                      title="Ouvrir"
+                      color="#16a085"
+                      onPress={() => this.openWalk(data)}
+                    />
+                  ) : (
+                      <Button
+                        title="Télécharger"
+                        onPress={() => this.downloadWalk(data)}
+                      />
+                    )}
                 </ListItem.Content>
               </ListItem>
             ))}
@@ -438,12 +463,12 @@ export default class App extends React.Component {
 
 const CustomProgressBar = ({ visible, title, message }) => (
   <Modal visible={visible}>
-          <View style={{ flex:1,backgroundColor:"#00000020", justifyContent:"center",alignItems:"center"}}>
-            <View style={{backgroundColor:"white",padding:10,borderRadius:5, width:"80%", alignItems:"center"}}>
-              <Text style={{fontSize: 20}}>{title}</Text>
-              <Text>{message}</Text>
-              <ActivityIndicator size="large" color="#dc3133"/>
-            </View>
-          </View>
-        </Modal>
+    <View style={{ flex: 1, backgroundColor: "#00000020", justifyContent: "center", alignItems: "center" }}>
+      <View style={{ backgroundColor: "white", padding: 10, borderRadius: 5, width: "80%", alignItems: "center" }}>
+        <Text style={{ fontSize: 20 }}>{title}</Text>
+        <Text>{message}</Text>
+        <ActivityIndicator size="large" color="#dc3133" />
+      </View>
+    </View>
+  </Modal>
 );
