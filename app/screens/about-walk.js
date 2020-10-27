@@ -16,12 +16,16 @@ export default class App extends React.Component {
     }
 
     openMap(initialPoint) {
-        let url = `http://maps.google.com/maps?daddr=${initialPoint.coords.latitude},${initialPoint.coords.longitude}`
+        const latLng = `${initialPoint.coords.latitude},${initialPoint.coords.longitude}`;
+        const label = 'Point de départ de la randonnée';
+        const url = `maps:0,0?q=${label}@${latLng}`
+        
         Linking.canOpenURL(url).then(supported => {
             if (supported) {
                 Linking.openURL(url);
             }
         });
+        
     };
 
 

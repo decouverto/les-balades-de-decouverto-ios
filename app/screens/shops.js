@@ -19,14 +19,19 @@ export default class ShopsScreen extends React.Component {
     this.state = { errLoading: false, shops: [] };
   }
 
-  openMap(initialPoint) {
-    let url = `http://maps.google.com/maps?daddr=${initialPoint.latitude},${initialPoint.longitude}`;
-    Linking.canOpenURL(url).then((supported) => {
-      if (supported) {
-        Linking.openURL(url);
-      }
+
+  openMap(data) {
+    const latLng = `${data.latitude},${data.longitude}`;
+    const label = data.title;
+    const url = `maps:0,0?q=${label}@${latLng}`
+    
+    Linking.canOpenURL(url).then(supported => {
+        if (supported) {
+            Linking.openURL(url);
+        }
     });
-  }
+      
+  };
 
   componentDidMount() {
     this._mounted = true;
