@@ -10,16 +10,7 @@ import { parallel, every } from 'async';
 
 const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
 
-import { useFocusEffect } from '@react-navigation/native';
-function FocusEffect({ onFocus, onFocusRemoved }) {
-    useFocusEffect(
-      React.useCallback(() => {
-        onFocus();
-        return () => onFocusRemoved();
-      }, [onFocus, onFocusRemoved]),
-    );
-    return null;
-}
+import FocusEffect from '../lib/focus.js';
 
 export default class App extends React.Component {
     

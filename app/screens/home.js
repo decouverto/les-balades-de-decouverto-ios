@@ -24,16 +24,7 @@ const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
 import tileList from 'osm-tile-list-json';
 import { each } from 'async';
 
-import { useFocusEffect } from '@react-navigation/native';
-function FocusEffect({ onFocus, onFocusRemoved }) {
-    useFocusEffect(
-      React.useCallback(() => {
-        onFocus();
-        return () => onFocusRemoved();
-      }, [onFocus, onFocusRemoved]),
-    );
-    return null;
-}
+import FocusEffect from '../lib/focus.js';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -54,7 +45,7 @@ export default class App extends React.Component {
     this.updateState = this.updateState.bind(this);
   }
 
-    updateState () {
+  updateState () {
       AsyncStorage.multiGet(['walks', 'downloadedWalks'], (err, values) => {
           if (values !== null && !err) {
               var obj = {};
@@ -72,6 +63,17 @@ export default class App extends React.Component {
           }
       });
   } 
+
+  componentDidUpdate(prevProps) {
+    let nextProps = this.props.route;
+      if (nextProps.params != undefined && nextProps.params.from != undefined) {
+        if (nextProps.params.from == 'AboutWalk') {
+          this.updateState();
+        }
+      } 
+       
+  }
+
 
   componentDidMount() {
     this._mounted = true;
@@ -258,7 +260,8 @@ export default class App extends React.Component {
                             {
                               text: 'Ok',
                               onPress: () => {
-                                this.hideDownloadingMessage({downloadedWalks}, () => {
+                                this.hideDownloadingMessage({downloadedWalks, search: ''}, () => {
+                                  this.calculateWlkToDisplay();
                                   this.openWalk(data);
                                 });
                               }
@@ -280,7 +283,8 @@ export default class App extends React.Component {
                             {
                               text: 'Ok',
                               onPress: () => {
-                                this.hideDownloadingMessage({downloadedWalks},() => {
+                                this.hideDownloadingMessage({downloadedWalks, search: ''},() => {
+                                  this.calculateWlkToDisplay()
                                   this.openWalk(data);
                                 });
                               }

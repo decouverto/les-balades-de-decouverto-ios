@@ -41,7 +41,7 @@ export default class App extends React.Component {
                             name="arrow-left"
                             type="font-awesome-5"
                             color="#fff"
-                            onPress={() => this.props.navigation.navigate('Home')}
+                            onPress={() => this.props.navigation.navigate('Home', {from: 'AboutWalk'})}
                         />
                     }
                     centerComponent={{ text: "Découverto", style: { color: "#fff" } }}
