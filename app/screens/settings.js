@@ -10,13 +10,27 @@ import { parallel, every } from 'async';
 
 const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
 
+import { useFocusEffect } from '@react-navigation/native';
+function FocusEffect({ onFocus, onFocusRemoved }) {
+    useFocusEffect(
+      React.useCallback(() => {
+        onFocus();
+        return () => onFocusRemoved();
+      }, [onFocus, onFocusRemoved]),
+    );
+    return null;
+}
+
 export default class App extends React.Component {
+    
+
     constructor(props) {
         super(props);
         this.state = { walks: [], downloadedWalks: [], wlkToDisplay: [], loading: true };
+        this.updateState = this.updateState.bind(this);
     }
 
-    componentDidMount() {
+    updateState () {
         AsyncStorage.multiGet(['walks', 'downloadedWalks'], (err, values) => {
             if (values !== null && !err) {
                 var obj = {};
@@ -25,12 +39,24 @@ export default class App extends React.Component {
                         obj[values[i][0]] = JSON.parse(values[i][1]);
                     }
                 }
-                this.setState(obj, () => {
-                    this.calculateWlkToDisplay()
-                });
+                if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
+                    this.setState(obj, () => {
+                        this.calculateWlkToDisplay()
+                    });
+                }
+                
             }
         });
+    } 
+
+    componentDidMount() {
+        this.updateState();
     }
+
+    componentWillUnmount() {
+        // Remove the event listener
+        this.focusListener.remove();
+      }
 
     isDownloaded(id) {
         for (let k in this.state.downloadedWalks) {
@@ -214,6 +240,10 @@ export default class App extends React.Component {
     render() {
         return (
             <ThemeProvider>
+                <FocusEffect
+                        onFocus={this.updateState}
+                        onFocusRemoved={()=>false}
+                />
                 <Header
                     leftComponent={
                         <Icon

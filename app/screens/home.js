@@ -24,6 +24,17 @@ const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
 import tileList from 'osm-tile-list-json';
 import { each } from 'async';
 
+import { useFocusEffect } from '@react-navigation/native';
+function FocusEffect({ onFocus, onFocusRemoved }) {
+    useFocusEffect(
+      React.useCallback(() => {
+        onFocus();
+        return () => onFocusRemoved();
+      }, [onFocus, onFocusRemoved]),
+    );
+    return null;
+}
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -40,7 +51,27 @@ export default class App extends React.Component {
       }
     };
     this.state = state;
+    this.updateState = this.updateState.bind(this);
   }
+
+    updateState () {
+      AsyncStorage.multiGet(['walks', 'downloadedWalks'], (err, values) => {
+          if (values !== null && !err) {
+              var obj = {};
+              for (var i in values) {
+                  if (values[i][1] != null) {
+                      obj[values[i][0]] = JSON.parse(values[i][1]);
+                  }
+              }
+              if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
+                  this.setState(obj, () => {
+                      this.calculateWlkToDisplay()
+                  });
+              }
+              
+          }
+      });
+  } 
 
   componentDidMount() {
     this._mounted = true;
@@ -167,12 +198,13 @@ export default class App extends React.Component {
           {
             text: 'Ok',
             onPress: () => {
-              this.hideDownloadingMessage();
+              this.hideDownloadingMessage({});
             }
           }
         ],
         { cancelable: false }
       );
+
     }
     this.setState({
       downloading: true
@@ -199,9 +231,9 @@ export default class App extends React.Component {
             .then(() => {
               fs.unlink(rootDirectory + data.id + '/tmp.zip')
                 .then(() => {
-                  let list = this.state.downloadedWalks;
-                  list.push(data.id);
-                  AsyncStorage.setItem('downloadedWalks', JSON.stringify(list));
+                  let downloadedWalks = this.state.downloadedWalks;
+                  downloadedWalks.push(data.id);
+                  AsyncStorage.setItem('downloadedWalks', JSON.stringify(downloadedWalks));
                   this.showDowloadingMessage({
                     title: 'Téléchargement des cartes',
                     message: 'Veuillez patientez... '
@@ -226,7 +258,7 @@ export default class App extends React.Component {
                             {
                               text: 'Ok',
                               onPress: () => {
-                                this.hideDownloadingMessage(() => {
+                                this.hideDownloadingMessage({downloadedWalks}, () => {
                                   this.openWalk(data);
                                 });
                               }
@@ -248,7 +280,7 @@ export default class App extends React.Component {
                             {
                               text: 'Ok',
                               onPress: () => {
-                                this.hideDownloadingMessage(() => {
+                                this.hideDownloadingMessage({downloadedWalks},() => {
                                   this.openWalk(data);
                                 });
                               }
@@ -350,13 +382,14 @@ export default class App extends React.Component {
     });
   }
 
-  hideDownloadingMessage(cb) {
+  hideDownloadingMessage(obj, cb) {
     this.setState({
       downloading: false,
       downloadingProgress: {
         title: '',
         message: ''
-      }
+      },
+      ...obj
     }, () => {
       if (typeof cb === 'function') {
         cb()
@@ -378,6 +411,10 @@ export default class App extends React.Component {
   render() {
     return (
       <ThemeProvider>
+        <FocusEffect
+                        onFocus={this.updateState}
+                        onFocusRemoved={()=>false}
+        />
         <Header
           leftComponent={
             <Icon
