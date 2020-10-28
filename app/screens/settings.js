@@ -251,7 +251,7 @@ export default class App extends React.Component {
                     }}
                 />
 
-                <ScrollView>
+                <View>
                     <Text h2 style={{marginLeft: 10}}>Balades téléchargées</Text>
                     {(this.state.loading) ? (
                         <Text style={{ marginTop: 20 }}>Chargement...</Text>
@@ -265,7 +265,7 @@ export default class App extends React.Component {
                                     title=" Télécharger des balades" />
                             </Card>
                             ) : (
-                                <View>
+                                <ScrollView>
                                 {this.state.wlkToDisplay.map((data, i) => (
                                     <ListItem key={i} bottomDivider>
                                       <ListItem.Content>
@@ -283,9 +283,9 @@ export default class App extends React.Component {
                                             <Button onPress={() => this.removeAllWalks()}
                                                 title=" Supprimer toutes les balades" />
                                     </ListItem>
-                                  </View>
+                                  </ScrollView>
                             )}
-                </ScrollView>
+                </View>
             </ThemeProvider>
         );
     }
