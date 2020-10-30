@@ -58,8 +58,11 @@ export default class ShopsScreen extends React.Component {
                 shops: shops,
               });
             },
-            () => {
-                console.error(shops);
+            (error) => {
+              console.error(error);
+              shops.forEach(function (val) {
+                  val.distance = -1;
+              });
               this.setState({
                 shops: shops,
               });
@@ -106,9 +109,9 @@ export default class ShopsScreen extends React.Component {
                   <ListItem.Title style={{ color: "#2c3e50" }}>
                     {data.title}
                   </ListItem.Title>
-                  <ListItem.Subtitle style={{ color: "#34495e" }}>
-                    {(data.distance / 1000).toFixed(1)}km
-                  </ListItem.Subtitle>
+                  {( (data.distance != -1) ? ( 
+                    <ListItem.Subtitle style={{ color: "#34495e" }}>{(data.distance / 1000).toFixed(1)}km</ListItem.Subtitle>
+                  ) : null)}
                   <Text>{data.address}</Text>
                   <HTMLView value={data.description} />
                   <Button
