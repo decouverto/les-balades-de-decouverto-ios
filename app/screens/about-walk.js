@@ -1,7 +1,12 @@
 import React from 'react';
-import { Linking, ScrollView } from 'react-native';
+import { Linking, ScrollView, Alert } from 'react-native';
 import { Card, Button, Icon, ThemeProvider, Header, Text } from 'react-native-elements';
 
+
+import fs from 'react-native-fs';
+const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
+
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class App extends React.Component {
     constructor(props) {
@@ -13,9 +18,6 @@ export default class App extends React.Component {
         if (this.props.route.params.id != prevProps.route.params.id) {
             this.setState(this.props.route.params);
         } 
-    }
-
-    componentWillUnmount() {
     }
 
     openMap(initialPoint) {
@@ -30,6 +32,53 @@ export default class App extends React.Component {
         });
         
     };
+
+    removeWalk(id) {
+        Alert.alert(
+            'Attention',
+            'Êtes-vous sûr de vouloir supprimer la promenade de votre téléphone ?',
+            [
+                { text: 'Annuler' },
+                {
+                    text: 'OK', onPress: () => {
+                        fs.unlink(rootDirectory + id)
+                            .then(() => {
+                                AsyncStorage.getItem('downloadedWalks', (err, value) => {
+                                    if (value !== null && !err) {
+                                        let list = JSON.parse(value);
+                                        let k = list.indexOf(id);
+                                        if (k > -1) {
+                                            list.splice(k, 1);
+                                        }
+                                        AsyncStorage.setItem('downloadedWalks', JSON.stringify(list));
+                                        this.props.navigation.navigate('Home', {from: 'AboutWalk'})
+                                        Alert.alert(
+                                            'Succès',
+                                            'Les fichiers ont bien été supprimées.',
+                                            [
+                                                { text: 'Ok' },
+                                            ],
+                                            { cancelable: false }
+                                        );
+                                    }
+                                });
+                            })
+                            .catch(() => {
+                                Alert.alert(
+                                    'Erreur',
+                                    'Impossible de supprimer les fichiers du téléphone.',
+                                    [
+                                        { text: 'Ok' },
+                                    ],
+                                    { cancelable: false }
+                                );
+                            });
+                    }
+                },
+            ],
+            { cancelable: false }
+        )
+    }
 
 
     render() {
@@ -50,7 +99,7 @@ export default class App extends React.Component {
                             name="trash-alt"
                             type="font-awesome-5"
                             color="#fff"
-                            onPress={() => false}
+                            onPress={() => this.removeWalk(this.state.id)}
                         />
                     }
                     containerStyle={{
