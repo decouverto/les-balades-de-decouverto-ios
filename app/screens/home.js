@@ -12,6 +12,7 @@ import {
   Header,
   ListItem,
   Text,
+  Card,
   SearchBar,
 } from 'react-native-elements';
 
@@ -31,6 +32,7 @@ export default class App extends React.Component {
     super(props);
     let state = {
       errLoading: false,
+      loading: true,
       walks: [],
       downloadedWalks: [],
       wlkToDisplay: [],
@@ -121,6 +123,7 @@ export default class App extends React.Component {
             this.setState(
               {
                 errLoading: false,
+                loading: false,
                 walks: responseJson,
               },
               () => {
@@ -138,6 +141,7 @@ export default class App extends React.Component {
         .catch(() => {
           this.setState({
             errLoading: true,
+            loading: false
           });
         });
     });
@@ -454,46 +458,58 @@ export default class App extends React.Component {
             }
             value={this.state.search}
           />
-          <ScrollView>
-            {this.state.wlkToDisplay.map((data, i) => (
-              <ListItem key={i} bottomDivider>
-                <ListItem.Content>
-                  <ListItem.Title style={{ color: "#2c3e50" }}>
-                    {data.title} {(data.downloaded) ? (
-                      <Icon
-                        name="walking"
-                        type="font-awesome-5"
+          {(this.state.loading) ? (
+              <Card>
+                <Text style={{ marginBottom: 20 }}>Chargement...</Text>
+                <ActivityIndicator size="large" color="#dc3133" />
+              </Card>
+            ) : (this.state.errLoading) ? (
+              <Card> 
+                <Text>Impossible de télécharger la liste des dernières balades, vous êtes certainement hors-ligne.</Text>
+              </Card>
+            ) : (
+              <ScrollView>
+              {this.state.wlkToDisplay.map((data, i) => (
+                <ListItem key={i} bottomDivider>
+                  <ListItem.Content>
+                    <ListItem.Title style={{ color: "#2c3e50" }}>
+                      {data.title} {(data.downloaded) ? (
+                        <Icon
+                          name="walking"
+                          type="font-awesome-5"
+                          color="#16a085"
+                        />
+                      ) : (
+                          null
+                        )}
+                    </ListItem.Title>
+                    <ListItem.Subtitle style={{ color: "#34495e" }}>
+                      {(data.distance / 1000).toFixed(1)}km
+                    </ListItem.Subtitle>
+                    {data.fromBook == "true" ? (
+                      <Text style={{ color: "#7f8c8d" }}>Tracé uniquement</Text>
+                    ) : (
+                        <Text style={{ color: "#7f8c8d" }}>Balade commentée</Text>
+                      )}
+                    <Text italic={data.fromBook}>{data.description}</Text>
+                    {(data.downloaded) ? (
+                      <Button
+                        title="Ouvrir"
                         color="#16a085"
+                        onPress={() => this.openWalk(data)}
                       />
                     ) : (
-                        null
+                        <Button
+                          title="Télécharger"
+                          onPress={() => this.downloadWalk(data)}
+                        />
                       )}
-                  </ListItem.Title>
-                  <ListItem.Subtitle style={{ color: "#34495e" }}>
-                    {(data.distance / 1000).toFixed(1)}km
-                  </ListItem.Subtitle>
-                  {data.fromBook == "true" ? (
-                    <Text style={{ color: "#7f8c8d" }}>Tracé uniquement</Text>
-                  ) : (
-                      <Text style={{ color: "#7f8c8d" }}>Balade commentée</Text>
-                    )}
-                  <Text italic={data.fromBook}>{data.description}</Text>
-                  {(data.downloaded) ? (
-                    <Button
-                      title="Ouvrir"
-                      color="#16a085"
-                      onPress={() => this.openWalk(data)}
-                    />
-                  ) : (
-                      <Button
-                        title="Télécharger"
-                        onPress={() => this.downloadWalk(data)}
-                      />
-                    )}
-                </ListItem.Content>
-              </ListItem>
-            ))}
-          </ScrollView>
+                  </ListItem.Content>
+                </ListItem>
+              ))}
+            </ScrollView>
+          )}
+          
         </View>
       </ThemeProvider>
     );
