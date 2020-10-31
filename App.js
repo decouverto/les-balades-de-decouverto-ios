@@ -2,6 +2,7 @@ import HomeScreen from "./app/screens/home.js";
 import ShopsScreen from "./app/screens/shops.js";
 import SettingsScreen from "./app/screens/settings.js";
 import AboutWalkScreen from "./app/screens/about-walk.js";
+import AboutMarkerScreen from "./app/screens/about-marker.js";
 import MapScreen from "./app/screens/map.js";
 import { Linking, Share, Alert } from "react-native";
 import { Icon } from "react-native-elements";
@@ -77,6 +78,7 @@ export default function App() {
         <Drawer.Screen name="Shops" component={ShopsScreen} />
         <Drawer.Screen name="Settings" component={SettingsScreen} />
         <Drawer.Screen name="AboutWalk" component={AboutWalkScreen} />
+        <Drawer.Screen name="AboutMarker" component={AboutMarkerScreen} />
         <Drawer.Screen name="Map" component={MapScreen} />
       </Drawer.Navigator>
     </NavigationContainer>

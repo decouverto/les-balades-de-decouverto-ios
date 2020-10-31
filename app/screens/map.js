@@ -21,8 +21,7 @@ export default class App extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.props.route.params.id != prevProps.route.params.id) {
-            this.setState(this.props.route.params);
-            this.centerMap();
+            this.setState(this.props.route.params, this.centerMap);
         } 
     }
 
@@ -64,7 +63,7 @@ export default class App extends React.Component {
                       }
                 />
 
-                <View  style={styles.main_container}>
+                <View style={styles.main_container}>
                         <MapView
                         initialRegion={{
                             latitude: this.state.points[0].coords.latitude,
@@ -97,8 +96,8 @@ export default class App extends React.Component {
                         <UrlTile
                             urlTemplate ={'file://'+ rootDirectory + this.state.id + '/{z}/{x}/{y}.png'}
                             tileSize={256}
-                            zIndex={-10}
-                            />
+                            zIndex={-3}
+                        />
                         <Polyline
                             coordinates={this.state.itinerary}
                             strokeColor='#000'
