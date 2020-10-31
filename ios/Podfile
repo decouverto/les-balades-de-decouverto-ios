@@ -8,6 +8,7 @@ target 'decouverto' do
 
   use_react_native!(:path => config["reactNativePath"])
 
+
   target 'decouvertoTests' do
     inherit! :complete
     # Pods for testing

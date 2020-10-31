@@ -2,6 +2,7 @@ import HomeScreen from "./app/screens/home.js";
 import ShopsScreen from "./app/screens/shops.js";
 import SettingsScreen from "./app/screens/settings.js";
 import AboutWalkScreen from "./app/screens/about-walk.js";
+import MapScreen from "./app/screens/map.js";
 import { Linking, Share, Alert } from "react-native";
 import { Icon } from "react-native-elements";
 
@@ -10,7 +11,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
-  DrawerItemList,
   DrawerItem,
 } from "@react-navigation/drawer";
 
@@ -77,6 +77,7 @@ export default function App() {
         <Drawer.Screen name="Shops" component={ShopsScreen} />
         <Drawer.Screen name="Settings" component={SettingsScreen} />
         <Drawer.Screen name="AboutWalk" component={AboutWalkScreen} />
+        <Drawer.Screen name="Map" component={MapScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
