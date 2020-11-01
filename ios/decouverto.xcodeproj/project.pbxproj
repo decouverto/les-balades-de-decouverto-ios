@@ -15,9 +15,9 @@
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* decouvertoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* decouvertoTests.m */; };
-		57050CA3A60301BC4B7E23F3 /* libPods-decouverto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54F63BA24DE155745B367C47 /* libPods-decouverto.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		89FBA7230A874A06DFF06B3F /* libPods-decouverto-decouvertoTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7922870037AFC2D8BD9CE4B9 /* libPods-decouverto-decouvertoTests.a */; };
+		9CB470B4906B9F08CA165F66 /* libPods-decouverto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 54F63BA24DE155745B367C47 /* libPods-decouverto.a */; };
 		ADAB7755254EDA1F0093D80C /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADAB7754254EDA1F0093D80C /* File.swift */; };
 		C6552E2518459DF8BBFDD0FE /* libPods-decouverto-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1657DC18C0A8ADDF18178A46 /* libPods-decouverto-tvOSTests.a */; };
 		F2E462A8C82DCDBC712BF60E /* libPods-decouverto-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 972C3753C3515EE17C266A49 /* libPods-decouverto-tvOS.a */; };
@@ -102,7 +102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57050CA3A60301BC4B7E23F3 /* libPods-decouverto.a in Frameworks */,
+				9CB470B4906B9F08CA165F66 /* libPods-decouverto.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -777,6 +777,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58G445TYFB;
 				ENABLE_BITCODE = NO;
+				EXCLUDED_ARCHS = "";
+				"EXCLUDED_ARCHS[sdk=*]" = arm64;
 				INFOPLIST_FILE = decouverto/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
@@ -805,6 +807,8 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58G445TYFB;
+				EXCLUDED_ARCHS = "";
+				"EXCLUDED_ARCHS[sdk=*]" = arm64;
 				INFOPLIST_FILE = decouverto/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
