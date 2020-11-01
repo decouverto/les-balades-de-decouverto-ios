@@ -1,13 +1,18 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Card, Button, Icon, ThemeProvider, Header, Text } from 'react-native-elements';
+import { View, StyleSheet, Text } from 'react-native';
+import { Icon, ThemeProvider, Header, Button } from 'react-native-elements';
+
+import { observer } from "mobx-react";
 
 import fs from 'react-native-fs';
 const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
 
 import MapView, { Polyline, Marker, PROVIDER_APPLE, UrlTile } from 'react-native-maps';
 
-export default class App extends React.Component {
+import TrackPlayer from 'react-native-track-player';
+import PlayerStore from '../stores/player';
+
+class MapScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = this.props.route.params;
@@ -109,19 +114,35 @@ export default class App extends React.Component {
                         </View>
                     </MapView>
                 </View>
-                <Text style={styles.over}>{this.state.title}</Text>
+                <View style={styles.button_audio_container}>
+                {(PlayerStore.playbackState == TrackPlayer.STATE_PLAYING || PlayerStore.playbackState === TrackPlayer.STATE_BUFFERING) ? (
+                        <Button
+                        onPress={() => TrackPlayer.pause()}
+                        icon={<Icon name='pause' type='material' color='#fff' />}
+                        buttonStyle={styles.button_audio}
+                        title="" />
+                ) : null}
+                {(PlayerStore.playbackState == TrackPlayer.STATE_PAUSED) ? (
+                        <Button
+                        onPress={() => TrackPlayer.play()}
+                        buttonStyle={styles.button_audio}
+                        icon={<Icon name='play-arrow' type='material' color='#fff' />}
+                        title="" /> 
+                ) : null}
+                </View>
             </ThemeProvider>
         );
     }
 }
 
+export default observer(MapScreen);
 
 const styles = StyleSheet.create({
     main_container: {
         top: 0,
         left: 0,
         right: 0,
-        bottom: 50,
+        bottom: 0,
         height: '100%',
         width: '100%',
         alignItems: 'stretch',
@@ -132,16 +153,22 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        flex: 1
+        flex: 1,
+        zIndex: -1
     },
-    over: {
+    button_audio_container: {
         position: 'absolute',
-        right: 10,
-        bottom: 10,
+        right: 20,
+        bottom: 20,
         marginRight: 0,
         marginLeft: 0,
-        paddingLeft: 10,
-        paddingRight: 10,
+        paddingLeft: 20,
+        paddingRight: 20,
         flex: 1
+    },
+    button_audio: {
+        backgroundColor: '#dc3133',
+        width: 70,
+        height: 50
     }
 });
