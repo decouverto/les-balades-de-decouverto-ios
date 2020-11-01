@@ -21,6 +21,7 @@ import { unzip } from 'react-native-zip-archive';
 
 const rootURL = 'http://decouverto.fr/walks/';
 const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
+//console.warn(rootDirectory)
 
 import tileList from 'osm-tile-list-json';
 import { each } from 'async';

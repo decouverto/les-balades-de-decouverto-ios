@@ -80,6 +80,7 @@ export default class App extends React.Component {
                         mapType={'standard'}
                         loadingEnabled={true}
                         ref={(ref) => { this.mapRef = ref }}
+                        provider={PROVIDER_APPLE}
                         >
                         
                         <View>
@@ -97,6 +98,7 @@ export default class App extends React.Component {
                             urlTemplate ={'file://'+ rootDirectory + this.state.id + '/{z}/{x}/{y}.png'}
                             tileSize={256}
                             zIndex={-3}
+                            maximumZ={maxZoomLevel}
                         />
                         <Polyline
                             coordinates={this.state.itinerary}
