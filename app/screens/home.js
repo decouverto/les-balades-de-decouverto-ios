@@ -1,9 +1,6 @@
 import React from 'react';
-import { Linking, Alert, ScrollView, Button, LogBox, Modal, View, ActivityIndicator } from 'react-native';
+import { Linking, Alert, ScrollView, Button, Modal, View, ActivityIndicator } from 'react-native';
 
-LogBox.ignoreLogs([
-  'RCTBridge'
-]);
 
 import AsyncStorage from '@react-native-community/async-storage';
 import {
@@ -57,7 +54,7 @@ export default class App extends React.Component {
                       obj[values[i][0]] = JSON.parse(values[i][1]);
                   }
               }
-              if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
+              if (obj.walks.length != this.state.walks.length) {
                   this.setState(obj, () => {
                       this.calculateWlkToDisplay()
                   });
