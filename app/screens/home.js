@@ -54,11 +54,14 @@ export default class App extends React.Component {
                       obj[values[i][0]] = JSON.parse(values[i][1]);
                   }
               }
-              if (obj.walks.length != this.state.walks.length) {
+              if (obj.hasOwnProperty('walks')) {
+                if (obj.walks.length != this.state.walks.length) {
                   this.setState(obj, () => {
                       this.calculateWlkToDisplay()
                   });
+                }
               }
+              
               
           }
       });
