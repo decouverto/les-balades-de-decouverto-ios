@@ -41,10 +41,19 @@ class AboutMarker extends React.Component {
 
     componentDidMount() {
         TrackPlayer.getCurrentTrack().then((current) => {
-            this.setState({ currentPlaying: (current == this.state.sound) });
+            this.setState({ currentPlaying: (current == this.props.route.params.sound), ...this.props.route.params });
         }).catch(() => {
-            this.setState({ currentPlaying: true });
+            this.setState({ currentPlaying: true, ...this.props.route.params });
         })
+        TrackPlayer.setupPlayer().then(function () {
+            TrackPlayer.updateOptions({
+                stopWithApp: true,
+                capabilities: [
+                    TrackPlayer.CAPABILITY_PLAY,
+                    TrackPlayer.CAPABILITY_PAUSE
+                ]
+            });
+        });
     }
 
     togglePlayback() {

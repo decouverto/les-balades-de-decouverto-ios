@@ -21,7 +21,7 @@ class MapScreen extends React.Component {
     }
 
     componentDidMount() {
-        this.centerMap();
+        this.setState(this.props.route.params, this.centerMap);
     }
 
     componentDidUpdate(prevProps) {
@@ -37,11 +37,22 @@ class MapScreen extends React.Component {
         });
     }
 
+
     render() {
         let maxZoomLevel = 16;
         if (this.state.distance < 5000) {
             maxZoomLevel = 18;
         }
+        let listMarker = this.state.points.map(marker => {
+            return (<Marker
+                onCalloutPress={() => this.props.navigation.navigate('AboutMarker', { ...marker, walk: this.state })}
+                coordinate={marker.coords}
+                title={marker.title}
+                ref={marker.title}
+                key={marker.title}
+            />)
+        });
+
         return (
             <ThemeProvider>
                 <Header
@@ -80,6 +91,7 @@ class MapScreen extends React.Component {
                         showsCompass={true}
                         minZoomLevel={12}
                         maxZoomLevel={maxZoomLevel}
+                        moveOnMarkerPress = {false}
                         showsMyLocationButton={true}
                         showsUserLocation={true}
                         mapType={'standard'}
@@ -87,18 +99,7 @@ class MapScreen extends React.Component {
                         ref={(ref) => { this.mapRef = ref }}
                         provider={PROVIDER_APPLE}
                         >
-                        
-                        <View>
-                        {this.state.points.map(marker => (
-                            <Marker
-                                onCalloutPress={() => this.props.navigation.navigate('AboutMarker', { ...marker, walk: this.state })}
-                                coordinate={marker.coords}
-                                title={marker.title}
-                                ref={marker.title}
-                                key={marker.title}
-                            />
-                            
-                        ))}
+                        {listMarker}
                         <UrlTile
                             urlTemplate ={'file://'+ rootDirectory + this.state.id + '/{z}/{x}/{y}.png'}
                             tileSize={256}
@@ -111,7 +112,6 @@ class MapScreen extends React.Component {
                             strokeWidth={3}
                             zIndex={-2}
                         />
-                        </View>
                     </MapView>
                 </View>
                 <View style={styles.button_audio_container}>
