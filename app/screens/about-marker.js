@@ -32,7 +32,7 @@ class AboutMarker extends React.Component {
     componentDidUpdate(prevProps) {
         if (this.props.route.params.sound != prevProps.route.params.sound) {
             TrackPlayer.getCurrentTrack().then((current) => {
-                this.setState({ currentPlaying: (current == this.state.sound), ...this.props.route.params });
+                this.setState({ currentPlaying: (current == this.props.route.params.sound), ...this.props.route.params });
             }).catch(() => {
                 this.setState({ currentPlaying: true, ...this.props.route.params });
             })
