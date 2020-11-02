@@ -8,7 +8,8 @@
     "start": "react-native start",
     "link": "pod-install",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "react-native bundle --dev false --entry-file index.js --bundle-output ios/main.jsbundle --platform ios"
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
