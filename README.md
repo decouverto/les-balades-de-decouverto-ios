@@ -12,3 +12,15 @@ The application to discover history through rides from Découverto on iOS.
 
 * `ƒont-awesome-5`
 * `material`
+
+
+## Problem with XCode 
+
+```
+rm -rf ~/.itmstransporter/
+```
+
+
+```
+ cd ~/Library/Caches && mv com.apple.amp.itmstransporter com.apple.amp.itmstransporter.old
+```
