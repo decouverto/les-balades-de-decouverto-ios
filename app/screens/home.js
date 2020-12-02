@@ -45,36 +45,44 @@ export default class App extends React.Component {
     this.updateState = this.updateState.bind(this);
   }
 
-  updateState () {
-      AsyncStorage.multiGet(['walks', 'downloadedWalks'], (err, values) => {
-          if (values !== null && !err) {
-              var obj = {};
-              for (var i in values) {
-                  if (values[i][1] != null) {
-                      obj[values[i][0]] = JSON.parse(values[i][1]);
-                  }
-              }
-              if (obj.hasOwnProperty('walks')) {
-                if (obj.walks.length != this.state.walks.length) {
-                  this.setState(obj, () => {
-                      this.calculateWlkToDisplay()
-                  });
-                }
-              }
-              
-              
+  updateState() {
+    AsyncStorage.multiGet(['walks', 'downloadedWalks'], (err, values) => {
+      if (values !== null && !err) {
+        var obj = {};
+        for (var i in values) {
+          if (values[i][1] != null) {
+            obj[values[i][0]] = JSON.parse(values[i][1]);
           }
-      });
-  } 
+        }
+
+        if (obj.hasOwnProperty('walks')) {
+          if (obj.walks.length != this.state.walks.length) {
+            this.setState(obj, () => {
+              this.calculateWlkToDisplay();
+            });
+          }
+        } else {
+          if (obj.hasOwnProperty('downloadedWalks')) {
+            if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
+              this.setState(obj, () => {
+                this.calculateWlkToDisplay();
+              });
+            }
+          }
+        }
+
+
+      }
+    });
+  }
 
   componentDidUpdate(prevProps) {
     let nextProps = this.props.route;
-      if (nextProps.params != undefined && nextProps.params.from != undefined) {
-        if (nextProps.params.from == 'AboutWalk') {
-          this.updateState();
-        }
-      } 
-       
+    if (nextProps.params != undefined && nextProps.params.from != undefined) {
+      if (nextProps.params.from == 'AboutWalk') {
+        this.updateState();
+      }
+    }
   }
 
 
@@ -265,7 +273,7 @@ export default class App extends React.Component {
                             {
                               text: 'Ok',
                               onPress: () => {
-                                this.hideDownloadingMessage({downloadedWalks, search: ''}, () => {
+                                this.hideDownloadingMessage({ downloadedWalks, search: '' }, () => {
                                   this.calculateWlkToDisplay();
                                   this.openWalk(data);
                                 });
@@ -288,7 +296,7 @@ export default class App extends React.Component {
                             {
                               text: 'Ok',
                               onPress: () => {
-                                this.hideDownloadingMessage({downloadedWalks, search: ''},() => {
+                                this.hideDownloadingMessage({ downloadedWalks, search: '' }, () => {
                                   this.calculateWlkToDisplay()
                                   this.openWalk(data);
                                 });
@@ -310,16 +318,16 @@ export default class App extends React.Component {
 
   openWalk(data) {
     fs.readFile(rootDirectory + data.id + '/index.json').then((response) => {
-        this.props.navigation.navigate('AboutWalk', { ...data, ...JSON.parse(response) });
+      this.props.navigation.navigate('AboutWalk', { ...data, ...JSON.parse(response) });
     }).catch(() => {
-        Alert.alert(
-            'Erreur',
-            'Impossible de lire le parcours',
-            [
-                { text: 'Ok' },
-            ],
-            { cancelable: false }
-        );
+      Alert.alert(
+        'Erreur',
+        'Impossible de lire le parcours',
+        [
+          { text: 'Ok' },
+        ],
+        { cancelable: false }
+      );
     });
   }
 
@@ -421,8 +429,8 @@ export default class App extends React.Component {
     return (
       <ThemeProvider>
         <FocusEffect
-                        onFocus={this.updateState}
-                        onFocusRemoved={()=>false}
+          onFocus={this.updateState}
+          onFocusRemoved={() => false}
         />
         <Header
           leftComponent={
@@ -460,57 +468,57 @@ export default class App extends React.Component {
             value={this.state.search}
           />
           {(this.state.loading) ? (
-              <Card>
-                <Text style={{ marginBottom: 20 }}>Chargement...</Text>
-                <ActivityIndicator size="large" color="#dc3133" />
-              </Card>
-            ) : (this.state.errLoading) ? (
-              <Card> 
-                <Text>Impossible de télécharger la liste des dernières balades, vous êtes certainement hors-ligne.</Text>
-              </Card>
-            ) : (
-              <ScrollView>
-              {this.state.wlkToDisplay.map((data, i) => (
-                <ListItem key={i} bottomDivider>
-                  <ListItem.Content>
-                    <ListItem.Title style={{ color: "#2c3e50" }}>
-                      {data.title} {(data.downloaded) ? (
-                        <Icon
-                          name="walking"
-                          type="font-awesome-5"
-                          color="#16a085"
-                        />
-                      ) : (
-                          null
-                        )}
-                    </ListItem.Title>
-                    <ListItem.Subtitle style={{ color: "#34495e" }}>
-                      {(data.distance / 1000).toFixed(1)}km
+            <Card>
+              <Text style={{ marginBottom: 20 }}>Chargement...</Text>
+              <ActivityIndicator size="large" color="#dc3133" />
+            </Card>
+          ) : (this.state.errLoading) ? (
+            <Card>
+              <Text>Impossible de télécharger la liste des dernières balades, vous êtes certainement hors-ligne.</Text>
+            </Card>
+          ) : (
+                <ScrollView>
+                  {this.state.wlkToDisplay.map((data, i) => (
+                    <ListItem key={i} bottomDivider>
+                      <ListItem.Content>
+                        <ListItem.Title style={{ color: "#2c3e50" }}>
+                          {data.title} {(data.downloaded) ? (
+                            <Icon
+                              name="walking"
+                              type="font-awesome-5"
+                              color="#16a085"
+                            />
+                          ) : (
+                              null
+                            )}
+                        </ListItem.Title>
+                        <ListItem.Subtitle style={{ color: "#34495e" }}>
+                          {(data.distance / 1000).toFixed(1)}km
                     </ListItem.Subtitle>
-                    {data.fromBook == "true" ? (
-                      <Text style={{ color: "#7f8c8d" }}>Tracé uniquement</Text>
-                    ) : (
-                        <Text style={{ color: "#7f8c8d" }}>Balade commentée</Text>
-                      )}
-                    <Text italic={data.fromBook}>{data.description}</Text>
-                    {(data.downloaded) ? (
-                      <Button
-                        title="Ouvrir"
-                        color="#16a085"
-                        onPress={() => this.openWalk(data)}
-                      />
-                    ) : (
-                        <Button
-                          title="Télécharger"
-                          onPress={() => this.downloadWalk(data)}
-                        />
-                      )}
-                  </ListItem.Content>
-                </ListItem>
-              ))}
-            </ScrollView>
-          )}
-          
+                        {data.fromBook == "true" ? (
+                          <Text style={{ color: "#7f8c8d" }}>Tracé uniquement</Text>
+                        ) : (
+                            <Text style={{ color: "#7f8c8d" }}>Balade commentée</Text>
+                          )}
+                        <Text italic={data.fromBook}>{data.description}</Text>
+                        {(data.downloaded) ? (
+                          <Button
+                            title="Ouvrir"
+                            color="#16a085"
+                            onPress={() => this.openWalk(data)}
+                          />
+                        ) : (
+                            <Button
+                              title="Télécharger"
+                              onPress={() => this.downloadWalk(data)}
+                            />
+                          )}
+                      </ListItem.Content>
+                    </ListItem>
+                  ))}
+                </ScrollView>
+              )}
+
         </View>
       </ThemeProvider>
     );

@@ -13,7 +13,7 @@ const rootDirectory = fs.LibraryDirectoryPath + '/decouverto/';
 import FocusEffect from '../lib/focus.js';
 
 export default class App extends React.Component {
-    
+
 
     constructor(props) {
         super(props);
@@ -21,7 +21,7 @@ export default class App extends React.Component {
         this.updateState = this.updateState.bind(this);
     }
 
-    updateState () {
+    updateState() {
         AsyncStorage.multiGet(['walks', 'downloadedWalks'], (err, values) => {
             if (values !== null && !err) {
                 var obj = {};
@@ -30,15 +30,25 @@ export default class App extends React.Component {
                         obj[values[i][0]] = JSON.parse(values[i][1]);
                     }
                 }
-                if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
-                    this.setState(obj, () => {
-                        this.calculateWlkToDisplay()
-                    });
+                if (obj.hasOwnProperty('downloadedWalks')) {
+                    if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
+                        this.setState(obj, () => {
+                            this.calculateWlkToDisplay();
+                        });
+                    }
+                } else {
+                    if (obj.hasOwnProperty('walks')) {
+                        if (obj.walks.length != this.state.walks.length) {
+                            this.setState(obj, () => {
+                                this.calculateWlkToDisplay();
+                            });
+                        }
+                    }
                 }
                 
             }
         });
-    } 
+    }
 
     componentDidMount() {
         this.updateState();
@@ -47,7 +57,7 @@ export default class App extends React.Component {
     componentWillUnmount() {
         // Remove the event listener
         this.focusListener.remove();
-      }
+    }
 
     isDownloaded(id) {
         for (let k in this.state.downloadedWalks) {
@@ -93,9 +103,9 @@ export default class App extends React.Component {
                         if (k > -1) {
                             downloadedWalks.splice(k, 1);
                         }
+                        AsyncStorage.setItem('downloadedWalks', JSON.stringify(downloadedWalks));
                         this.setState({ walks: walks, downloadedWalks: downloadedWalks }, () => {
                             this.calculateWlkToDisplay();
-                            AsyncStorage.setItem('downloadedWalks', JSON.stringify(this.state.downloadedWalks));
                         });
                         fs.unlink(rootDirectory + data.id)
                             .then(() => {
@@ -143,9 +153,9 @@ export default class App extends React.Component {
                             });
                         }, err => {
                             if (err) {
+                                AsyncStorage.setItem('downloadedWalks', JSON.parse(notDeleted));
                                 this.setState({ downloadedWalks: notDeleted }, () => {
                                     this.calculateWlkToDisplay();
-                                    AsyncStorage.setItem('downloadedWalks', JSON.parse(notDeleted));
                                 });
                                 Alert.alert(
                                     'Erreur',
@@ -156,9 +166,8 @@ export default class App extends React.Component {
                                     { cancelable: false }
                                 );
                             } else {
-                                this.setState({ walks: [], downloadedWalks: [], wlkToDisplay: [] }, () => {
-                                    AsyncStorage.setItem('downloadedWalks', '[]');
-                                });
+                                AsyncStorage.setItem('downloadedWalks', '[]');
+                                this.setState({ walks: [], downloadedWalks: [], wlkToDisplay: [] });
                                 Alert.alert(
                                     'Succès',
                                     'Les fichiers ont bien été supprimées.',
@@ -179,13 +188,13 @@ export default class App extends React.Component {
     readSize(f, callback) {
         fs.readDir(f).then(r => {
             let functions = []
-            r.forEach(file=> {
+            r.forEach(file => {
                 functions.push((cb) => {
-                        if (file.isFile()) {
-                            cb(null, file.size)
-                        } else {
-                            this.readSize(file.path, cb)
-                        }
+                    if (file.isFile()) {
+                        cb(null, file.size)
+                    } else {
+                        this.readSize(file.path, cb)
+                    }
                 })
             })
             parallel(functions, (err, result) => {
@@ -232,16 +241,16 @@ export default class App extends React.Component {
         return (
             <ThemeProvider>
                 <FocusEffect
-                        onFocus={this.updateState}
-                        onFocusRemoved={()=>false}
+                    onFocus={this.updateState}
+                    onFocusRemoved={() => false}
                 />
                 <Header
                     leftComponent={
                         <Icon
-                          name="menu"
-                          type="material"
-                          color="#fff"
-                          onPress={() => this.props.navigation.openDrawer()}
+                            name="menu"
+                            type="material"
+                            color="#fff"
+                            onPress={() => this.props.navigation.openDrawer()}
                         />
                     }
                     centerComponent={{ text: "Découverto", style: { color: "#fff" } }}
@@ -252,38 +261,38 @@ export default class App extends React.Component {
                 />
 
                 <View>
-                    <Text h2 style={{marginLeft: 10}}>Balades téléchargées</Text>
+                    <Text h2 style={{ marginLeft: 10 }}>Balades téléchargées</Text>
                     {(this.state.loading) ? (
                         <Text style={{ marginTop: 20 }}>Chargement...</Text>
                     ) : (this.state.wlkToDisplay.length == 0) ? (
-                            <Card>
-                                <Text style={{ marginBottom: 20 }}>Aucune balade téléchargée.</Text>
-                                <Button
-                                    onPress={() => this.props.navigation.navigate('Home')}
-                                    icon={<Icon name='download' type='font-awesome-5' color='#fff' />}
-                                    buttonStyle={{marginTop: 10, borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 0}}
-                                    title=" Télécharger des balades" />
-                            </Card>
-                            ) : (
+                        <Card>
+                            <Text style={{ marginBottom: 20 }}>Aucune balade téléchargée.</Text>
+                            <Button
+                                onPress={() => this.props.navigation.navigate('Home')}
+                                icon={<Icon name='download' type='font-awesome-5' color='#fff' />}
+                                buttonStyle={{ marginTop: 10, borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 0 }}
+                                title=" Télécharger des balades" />
+                        </Card>
+                    ) : (
                                 <ScrollView>
-                                {this.state.wlkToDisplay.map((data, i) => (
-                                    <ListItem key={i} bottomDivider>
-                                      <ListItem.Content>
-                                        <ListItem.Title onPress={() => this.removeWalk(data)} style={{ color: "#2c3e50" }}>
-                                          {data.title} 
-                                        </ListItem.Title>
-                                            <Button
-                                              title="Supprimer"
-                                              onPress={() => this.removeWalk(data)}
-                                            />
-                                      </ListItem.Content>
-                                    </ListItem>
-                                  ))}
+                                    {this.state.wlkToDisplay.map((data, i) => (
+                                        <ListItem key={i} bottomDivider>
+                                            <ListItem.Content>
+                                                <ListItem.Title onPress={() => this.removeWalk(data)} style={{ color: "#2c3e50" }}>
+                                                    {data.title}
+                                                </ListItem.Title>
+                                                <Button
+                                                    title="Supprimer"
+                                                    onPress={() => this.removeWalk(data)}
+                                                />
+                                            </ListItem.Content>
+                                        </ListItem>
+                                    ))}
                                     <ListItem>
-                                            <Button onPress={() => this.removeAllWalks()}
-                                                title=" Supprimer toutes les balades" />
+                                        <Button onPress={() => this.removeAllWalks()}
+                                            title=" Supprimer toutes les balades" />
                                     </ListItem>
-                                  </ScrollView>
+                                </ScrollView>
                             )}
                 </View>
             </ThemeProvider>
