@@ -30,20 +30,28 @@ export default class App extends React.Component {
                         obj[values[i][0]] = JSON.parse(values[i][1]);
                     }
                 }
+                var toUpdate = false;
+
                 if (obj.hasOwnProperty('downloadedWalks')) {
                     if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
-                        this.setState(obj, () => {
-                            this.calculateWlkToDisplay();
-                        });
-                    }
-                } else {
-                    if (obj.hasOwnProperty('walks')) {
-                        if (obj.walks.length != this.state.walks.length) {
-                            this.setState(obj, () => {
-                                this.calculateWlkToDisplay();
-                            });
+                        toUpdate = true;
+                    } else {
+                        if (obj.downloadedWalks.length == 0) {
+                            this.setState({loading: false});
                         }
                     }
+                }
+
+                if (obj.hasOwnProperty('walks')) {
+                    if (obj.walks.length != this.state.walks.length) {
+                        toUpdate = true;
+                    }
+                }
+
+                if (toUpdate) {
+                    this.setState(obj, () => {
+                        this.calculateWlkToDisplay();
+                    });
                 }
                 
             }

@@ -55,23 +55,23 @@ export default class App extends React.Component {
           }
         }
 
+        var toUpdate = false;
+
         if (obj.hasOwnProperty('walks')) {
           if (obj.walks.length != this.state.walks.length) {
-            this.setState(obj, () => {
-              this.calculateWlkToDisplay();
-            });
+            toUpdate = true;
           }
-        } else {
-          if (obj.hasOwnProperty('downloadedWalks')) {
-            if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
-              this.setState(obj, () => {
-                this.calculateWlkToDisplay();
-              });
-            }
+        } 
+        if (obj.hasOwnProperty('downloadedWalks')) {
+          if (obj.downloadedWalks.length != this.state.downloadedWalks.length) {
+            toUpdate = true;
           }
         }
-
-
+        if (toUpdate) {
+          this.setState(obj, () => {
+            this.calculateWlkToDisplay();
+          });
+        }
       }
     });
   }
