@@ -24,3 +24,7 @@ rm -rf ~/.itmstransporter/
 ```
  cd ~/Library/Caches && mv com.apple.amp.itmstransporter com.apple.amp.itmstransporter.old
 ```
+
+## Problem wit React-Native
+
+https://github.com/facebook/react-native/issues/29279
