@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "release": "react-native run-ios --configuration Release",
-    "ios": "react-native run-ios",
+    "ios": "react-native run-ios --verbose  --simulator=\"iPhone 15\" --configuration Debug",
     "start": "react-native start",
     "link": "pod-install",
     "test": "jest",
